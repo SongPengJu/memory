@@ -781,7 +781,7 @@
             <div class="music-title">春风十里</div>
             <div class="music-artist">鹿先森乐队</div>
         </div>
-        <audio id="bgMusic" loop>
+        <audio id="bgMusic" loop preload="auto">
             <source src="鹿先森乐队 - 春风十里.mp3" type="audio/mpeg">
         </audio>
     </div>
@@ -1078,26 +1078,62 @@
         const bgMusic = document.getElementById('bgMusic');
         const musicIcon = document.getElementById('musicIcon');
         let isMusicPlaying = false;
+        let isFirstPlay = true;
+
+        // 初始化音频
+        function initAudio() {
+            // 设置音量
+            bgMusic.volume = 0.5;
+            
+            // 添加触摸事件监听
+            document.addEventListener('touchstart', function() {
+                if (isFirstPlay) {
+                    bgMusic.play().then(() => {
+                        isMusicPlaying = true;
+                        musicIcon.textContent = '⏸';
+                        isFirstPlay = false;
+                    }).catch(error => {
+                        console.log('自动播放失败，需要用户交互');
+                    });
+                }
+            }, { once: true });
+
+            // 添加点击事件监听
+            document.addEventListener('click', function() {
+                if (isFirstPlay) {
+                    bgMusic.play().then(() => {
+                        isMusicPlaying = true;
+                        musicIcon.textContent = '⏸';
+                        isFirstPlay = false;
+                    }).catch(error => {
+                        console.log('自动播放失败，需要用户交互');
+                    });
+                }
+            }, { once: true });
+        }
 
         function toggleMusic() {
             if (isMusicPlaying) {
                 bgMusic.pause();
                 musicIcon.textContent = '▶';
             } else {
-                bgMusic.play();
-                musicIcon.textContent = '⏸';
+                bgMusic.play().then(() => {
+                    isMusicPlaying = true;
+                    musicIcon.textContent = '⏸';
+                }).catch(error => {
+                    alert('请点击页面任意位置后再次尝试播放音乐');
+                });
             }
             isMusicPlaying = !isMusicPlaying;
         }
 
-        // 页面加载时自动播放音乐（需要用户交互后）
-        document.addEventListener('click', function() {
-            if (!isMusicPlaying) {
-                bgMusic.play();
-                musicIcon.textContent = '⏸';
-                isMusicPlaying = true;
-            }
-        }, { once: true });
+        // 页面加载时初始化音频
+        window.onload = function() {
+            loadPhotos();
+            loadLetterList();
+            selectLetter('default');
+            initAudio();
+        };
     </script>
 </body>
 </html> 
