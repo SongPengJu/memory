@@ -774,15 +774,16 @@
     </div>
 
     <div class="music-player">
-        <div class="music-control" onclick="toggleMusic()">
+        <div class="music-control" onclick="handleMusicPlay()">
             <span id="musicIcon">▶</span>
         </div>
         <div class="music-info">
             <div class="music-title">春风十里</div>
             <div class="music-artist">鹿先森乐队</div>
         </div>
-        <audio id="bgMusic" loop preload="auto">
+        <audio id="bgMusic" controls style="display: none;">
             <source src="鹿先森乐队 - 春风十里.mp3" type="audio/mpeg">
+            您的浏览器不支持音频播放
         </audio>
     </div>
 
@@ -1078,53 +1079,58 @@
         const bgMusic = document.getElementById('bgMusic');
         const musicIcon = document.getElementById('musicIcon');
         let isMusicPlaying = false;
-        let isFirstPlay = true;
 
         // 初始化音频
         function initAudio() {
             // 设置音量
             bgMusic.volume = 0.5;
             
-            // 添加触摸事件监听
-            document.addEventListener('touchstart', function() {
-                if (isFirstPlay) {
-                    bgMusic.play().then(() => {
-                        isMusicPlaying = true;
-                        musicIcon.textContent = '⏸';
-                        isFirstPlay = false;
-                    }).catch(error => {
-                        console.log('自动播放失败，需要用户交互');
-                    });
-                }
-            }, { once: true });
+            // 添加音频事件监听
+            bgMusic.addEventListener('play', function() {
+                isMusicPlaying = true;
+                musicIcon.textContent = '⏸';
+            });
 
-            // 添加点击事件监听
-            document.addEventListener('click', function() {
-                if (isFirstPlay) {
-                    bgMusic.play().then(() => {
-                        isMusicPlaying = true;
-                        musicIcon.textContent = '⏸';
-                        isFirstPlay = false;
-                    }).catch(error => {
-                        console.log('自动播放失败，需要用户交互');
-                    });
+            bgMusic.addEventListener('pause', function() {
+                isMusicPlaying = false;
+                musicIcon.textContent = '▶';
+            });
+
+            // 添加页面交互事件
+            const startPlay = function() {
+                if (!isMusicPlaying) {
+                    const playPromise = bgMusic.play();
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            isMusicPlaying = true;
+                            musicIcon.textContent = '⏸';
+                        }).catch(error => {
+                            console.log('播放失败，需要用户交互');
+                        });
+                    }
                 }
-            }, { once: true });
+                document.removeEventListener('touchstart', startPlay);
+                document.removeEventListener('click', startPlay);
+            };
+
+            document.addEventListener('touchstart', startPlay);
+            document.addEventListener('click', startPlay);
         }
 
-        function toggleMusic() {
+        function handleMusicPlay() {
             if (isMusicPlaying) {
                 bgMusic.pause();
-                musicIcon.textContent = '▶';
             } else {
-                bgMusic.play().then(() => {
-                    isMusicPlaying = true;
-                    musicIcon.textContent = '⏸';
-                }).catch(error => {
-                    alert('请点击页面任意位置后再次尝试播放音乐');
-                });
+                const playPromise = bgMusic.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        isMusicPlaying = true;
+                        musicIcon.textContent = '⏸';
+                    }).catch(error => {
+                        alert('请先点击页面任意位置，然后再次尝试播放音乐');
+                    });
+                }
             }
-            isMusicPlaying = !isMusicPlaying;
         }
 
         // 页面加载时初始化音频
