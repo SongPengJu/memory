@@ -580,6 +580,56 @@
             font-size: 0.8em;
         }
 
+        .photo-preview {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .photo-preview img {
+            max-width: 90%;
+            max-height: 90vh;
+            object-fit: contain;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .photo-preview img:hover {
+            transform: scale(1.02);
+        }
+
+        .photo-preview .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.2);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .photo-preview .close-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
         @media (max-width: 768px) {
             header {
                 padding: 30px 0;
@@ -787,24 +837,36 @@
         </audio>
     </div>
 
+    <div class="photo-preview" id="photoPreview" style="display: none;">
+        <img src="" alt="预览图片" id="previewImage">
+        <div class="close-btn" onclick="closePreview()">&times;</div>
+    </div>
+
     <script>
         let currentPhoto = null;
         const gallery = document.getElementById('gallery');
         const emptyState = document.getElementById('emptyState');
+        const API_BASE_URL = 'http://your-server-url/api'; // 替换为您的服务器地址
         
-        // 加载本地存储的照片
-        function loadPhotos() {
-            const photos = JSON.parse(localStorage.getItem('photos')) || [];
-            gallery.innerHTML = '';
-            
-            if (photos.length === 0) {
-                gallery.appendChild(emptyState);
-                return;
+        // 加载照片
+        async function loadPhotos() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/photos`);
+                const photos = await response.json();
+                
+                gallery.innerHTML = '';
+                if (photos.length === 0) {
+                    gallery.appendChild(emptyState);
+                    return;
+                }
+                
+                photos.forEach(photo => {
+                    addPhotoToGallery(photo);
+                });
+            } catch (error) {
+                console.error('加载照片失败:', error);
+                alert('加载照片失败，请稍后重试');
             }
-            
-            photos.forEach(photo => {
-                addPhotoToGallery(photo);
-            });
         }
         
         // 添加照片到画廊
@@ -812,7 +874,7 @@
             const item = document.createElement('div');
             item.className = 'gallery-item';
             item.innerHTML = `
-                <img src="${photo.url}" alt="${photo.title}">
+                <img src="${photo.url}" alt="${photo.title}" onclick="showPhotoPreview('${photo.url}')">
                 <div class="content">
                     <h3 style="margin-bottom: 10px; color: var(--text-color);">${photo.title}</h3>
                     <div class="date">${photo.date}</div>
@@ -824,12 +886,22 @@
         }
         
         // 删除照片
-        function deletePhoto(id) {
+        async function deletePhoto(id) {
             if (confirm('确定要删除这张照片吗？')) {
-                const photos = JSON.parse(localStorage.getItem('photos')) || [];
-                const newPhotos = photos.filter(photo => photo.id !== id);
-                localStorage.setItem('photos', JSON.stringify(newPhotos));
-                loadPhotos();
+                try {
+                    const response = await fetch(`${API_BASE_URL}/photos/${id}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        loadPhotos();
+                    } else {
+                        throw new Error('删除失败');
+                    }
+                } catch (error) {
+                    console.error('删除照片失败:', error);
+                    alert('删除照片失败，请稍后重试');
+                }
             }
         }
         
@@ -859,7 +931,7 @@
         }
         
         // 保存照片
-        function savePhoto() {
+        async function savePhoto() {
             const title = document.getElementById('photoTitle').value.trim();
             const description = document.getElementById('descriptionText').value.trim();
             const date = document.getElementById('photoDate').value;
@@ -869,23 +941,28 @@
                 return;
             }
 
-            const photos = JSON.parse(localStorage.getItem('photos')) || [];
-            
-            photos.push({
-                id: Date.now().toString(),
-                url: currentPhoto,
-                title: title,
-                description: description,
-                date: new Date(date).toLocaleDateString('zh-CN', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                })
-            });
-            
-            localStorage.setItem('photos', JSON.stringify(photos));
-            closeModal();
-            loadPhotos();
+            try {
+                const formData = new FormData();
+                formData.append('title', title);
+                formData.append('description', description);
+                formData.append('date', date);
+                formData.append('image', currentPhoto);
+
+                const response = await fetch(`${API_BASE_URL}/photos`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    closeModal();
+                    loadPhotos();
+                } else {
+                    throw new Error('保存失败');
+                }
+            } catch (error) {
+                console.error('保存照片失败:', error);
+                alert('保存照片失败，请稍后重试');
+            }
         }
         
         // 处理照片上传
@@ -1061,6 +1138,7 @@
             loadPhotos();
             loadLetterList();
             selectLetter('default');
+            initAudio();
         };
 
         // 点击模态框外部关闭
@@ -1133,13 +1211,27 @@
             }
         }
 
-        // 页面加载时初始化音频
-        window.onload = function() {
-            loadPhotos();
-            loadLetterList();
-            selectLetter('default');
-            initAudio();
-        };
+        // 添加照片预览功能
+        function showPhotoPreview(imageUrl) {
+            const preview = document.getElementById('photoPreview');
+            const previewImage = document.getElementById('previewImage');
+            previewImage.src = imageUrl;
+            preview.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closePreview() {
+            const preview = document.getElementById('photoPreview');
+            preview.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // 点击预览图片外部关闭预览
+        document.getElementById('photoPreview').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closePreview();
+            }
+        });
     </script>
 </body>
 </html> 
