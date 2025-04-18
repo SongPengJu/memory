@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2.14 to 4.14</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #2196F3;
+            --background-color: #f8f9fa;
+            --card-background: #ffffff;
+            --text-color: #333333;
+            --text-secondary: #666666;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 0;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            margin-bottom: 30px;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+        }
+
+        h1 {
+            font-size: 3em;
+            font-weight: 300;
+            margin-bottom: 15px;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .subtitle {
+            font-size: 1.3em;
+            opacity: 0.9;
+            letter-spacing: 1px;
+            font-weight: 300;
+        }
+
+        .upload-section {
+            background: var(--card-background);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            margin-bottom: 30px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .upload-section:hover {
+            transform: translateY(-5px);
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .section-title::before {
+            content: "📝";
+            font-size: 1.2em;
+        }
+        
+        .upload-btn, .letter-btn {
+            background: var(--primary-color);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .upload-btn:hover, .letter-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+        }
+        
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            width: 100%;
+            justify-items: center;
+        }
+        
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            background: var(--card-background);
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .gallery-item:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .gallery-item img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .gallery-item:hover img {
+            transform: scale(1.1);
+        }
+        
+        .gallery-item .content {
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .gallery-item .date {
+            color: var(--text-secondary);
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .gallery-item .date::before {
+            content: "📅";
+            margin-right: 5px;
+        }
+        
+        .gallery-item .description {
+            color: var(--text-color);
+            line-height: 1.6;
+            margin-top: 10px;
+        }
+        
+        .delete-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255,0,0,0.8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            cursor: pointer;
+            display: none;
+            transition: all 0.3s ease;
+            z-index: 2;
+        }
+
+        .delete-btn:hover {
+            background: rgba(255,0,0,1);
+            transform: scale(1.1);
+        }
+        
+        .gallery-item:hover .delete-btn {
+            display: block;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal-content {
+            background: var(--card-background);
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            margin: 50px auto;
+            position: relative;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: color 0.3s ease;
+        }
+
+        .close-btn:hover {
+            color: var(--text-color);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        .date-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        .date-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+            resize: none;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .save-btn {
+            background: var(--primary-color);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .save-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state img {
+            width: 200px;
+            margin-bottom: 20px;
+        }
+
+        .letter-content {
+            background: #fff9e6;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            font-family: 'Ma Shan Zheng', cursive;
+            line-height: 2;
+            text-align: center;
+            position: relative;
+            animation: letterAppear 0.8s ease;
+            transform-origin: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        @keyframes letterAppear {
+            0% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .letter-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path d="M10,10 L90,10 L90,90 L10,90 Z" fill="none" stroke="%23ffd700" stroke-width="1" stroke-dasharray="5,5"/></svg>');
+            opacity: 0.1;
+            pointer-events: none;
+        }
+
+        .letter-content p {
+            margin-bottom: 20px;
+            position: relative;
+            animation: fadeInUp 0.5s ease forwards;
+            opacity: 0;
+        }
+
+        .letter-content p:nth-child(1) { animation-delay: 0.2s; }
+        .letter-content p:nth-child(2) { animation-delay: 0.4s; }
+        .letter-content p:nth-child(3) { animation-delay: 0.6s; }
+        .letter-content p:nth-child(4) { animation-delay: 0.8s; }
+        .letter-content p:nth-child(5) { animation-delay: 1s; }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .letter-signature {
+            text-align: right;
+            margin-top: 30px;
+            font-style: italic;
+            animation: fadeIn 1.2s ease forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .letter-date {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .letter-heart {
+            color: #ff6b6b;
+            font-size: 1.2em;
+            margin: 0 5px;
+        }
+
+        .letter-edit-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            z-index: 2;
+        }
+
+        .letter-new-btn {
+            position: absolute;
+            top: 15px;
+            right: 100px;
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            z-index: 2;
+        }
+
+        .letter-list {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: white;
+            border-radius: 20px;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            z-index: 2;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .letter-list:hover {
+            background: #f0f0f0;
+        }
+
+        .letter-select {
+            position: absolute;
+            top: 50px;
+            left: 15px;
+            background: white;
+            border-radius: 15px;
+            padding: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 2;
+            display: none;
+        }
+
+        .letter-select.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .letter-item {
+            padding: 8px 15px;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .letter-item:hover {
+            background: #f0f0f0;
+        }
+
+        .letter-item.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .letter-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 1em;
+            line-height: 1.6;
+            resize: vertical;
+            min-height: 200px;
+            margin-bottom: 20px;
+            transition: border-color 0.3s ease;
+        }
+
+        .letter-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .letter-save-btn {
+            background: var(--primary-color);
+            color: white;
+            padding: 10px 25px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .letter-save-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .music-player {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 15px;
+            border-radius: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .music-player:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .music-control {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .music-control:hover {
+            background: var(--secondary-color);
+            transform: scale(1.1);
+        }
+
+        .music-info {
+            font-size: 0.9em;
+            color: var(--text-color);
+        }
+
+        .music-title {
+            font-weight: 500;
+        }
+
+        .music-artist {
+            color: var(--text-secondary);
+            font-size: 0.8em;
+        }
+
+        .photo-preview {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .photo-preview img {
+            max-width: 80%;
+            max-height: 80vh;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .photo-preview img:hover {
+            transform: scale(1.02);
+        }
+
+        .photo-preview .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.2);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .photo-preview .close-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        @media (max-width: 768px) {
+            header {
+                padding: 30px 0;
+                min-height: 150px;
+                border-radius: 0;
+            }
+
+            h1 {
+                font-size: 2.2em;
+                margin-bottom: 10px;
+            }
+
+            .subtitle {
+                font-size: 1.1em;
+            }
+
+            .container {
+                padding: 10px;
+            }
+
+            .upload-section {
+                padding: 15px;
+                margin-bottom: 20px;
+            }
+
+            .section-title {
+                font-size: 1.3em;
+            }
+
+            .upload-btn, .letter-btn {
+                padding: 10px 20px;
+                font-size: 1em;
+            }
+
+            .gallery {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 10px;
+            }
+
+            .gallery-item {
+                max-width: 100%;
+            }
+
+            .gallery-item img {
+                height: 250px;
+            }
+
+            .gallery-item .content {
+                padding: 15px;
+            }
+
+            .modal-content {
+                width: 90%;
+                margin: 20px auto;
+                padding: 20px;
+            }
+
+            .letter-content {
+                padding: 20px;
+            }
+
+            .music-player {
+                bottom: 10px;
+                right: 10px;
+                padding: 8px 12px;
+            }
+
+            .music-info {
+                display: none;
+            }
+
+            .music-control {
+                width: 35px;
+                height: 35px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            header {
+                padding: 20px 0;
+                min-height: 120px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .subtitle {
+                font-size: 1em;
+            }
+
+            .gallery-item img {
+                height: 200px;
+            }
+
+            .form-group {
+                margin-bottom: 15px;
+            }
+
+            .date-input, .text-input {
+                padding: 10px;
+                font-size: 0.9em;
+            }
+
+            .save-btn {
+                padding: 10px 25px;
+                font-size: 1em;
+            }
+        }
+
+        .photo-item {
+            position: relative;
+            margin: 15px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            background: white;
+            width: 300px;
+            height: 350px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .photo-item img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            cursor: pointer;
+            display: block;
+        }
+
+        .photo-info {
+            padding: 15px;
+            position: relative;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .photo-info h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .photo-info p {
+            margin: 5px 0;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .photo-date {
+            font-size: 0.8em;
+            color: #999;
+            margin-top: auto;
+        }
+
+        .photo-item .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.3);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            z-index: 10;
+            font-size: 16px;
+            line-height: 25px;
+            text-align: center;
+            padding: 0;
+            opacity: 0.7;
+        }
+
+        .photo-item .delete-btn:hover {
+            background: rgba(0,0,0,0.5);
+            opacity: 1;
+        }
+
+        .char-count {
+            font-size: 0.8em;
+            color: var(--text-secondary);
+            margin-left: 5px;
+        }
+
+        .text-input.warning {
+            border-color: #ff9800;
+        }
+
+        .text-input.error {
+            border-color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>一些照片</h1>
+            <p class="subtitle">记录一段回忆</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="upload-section">
+            <h2 class="section-title">上传照片</h2>
+            <input type="file" id="photoInput" accept="image/*" style="display: none;">
+            <button class="upload-btn" onclick="document.getElementById('photoInput').click()">
+                <span style="margin-right: 8px;">📷</span>选择照片
+            </button>
+            <button class="letter-btn" onclick="showLetter()">
+                <span style="margin-right: 8px;">💌</span>查看信件
+            </button>
+            <div id="preview" style="margin-top: 20px;"></div>
+        </div>
+        
+        <div class="gallery" id="gallery">
+            <div class="empty-state" id="emptyState">
+                <img src="https://cdn-icons-png.flaticon.com/512/4254/4254068.png" alt="空状态">
+                <h2>还没有照片</h2>
+                <p>点击上方按钮上传你的第一张照片吧！</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal" id="descriptionModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h2 style="text-align: center; margin-bottom: 20px;">添加照片信息</h2>
+            
+            <div class="form-group">
+                <label for="photoDate">照片日期</label>
+                <input type="date" id="photoDate" class="date-input" required>
+            </div>
+
+            <div class="form-group">
+                <label for="photoTitle">照片标题 <span class="char-count" id="titleCount">0/10</span></label>
+                <input type="text" id="photoTitle" class="text-input" placeholder="给照片起个名字..." required maxlength="10">
+            </div>
+
+            <div class="form-group">
+                <label for="descriptionText">照片描述 <span class="char-count" id="descCount">0/15</span></label>
+                <textarea id="descriptionText" class="text-input" placeholder="写下你的想法..." style="height: 100px;" maxlength="15"></textarea>
+            </div>
+
+            <button class="save-btn" onclick="savePhoto()">保存</button>
+        </div>
+    </div>
+
+    <div class="modal" id="letterModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeLetterModal()">&times;</span>
+            <div class="letter-list" onclick="toggleLetterList()">信件列表</div>
+            <div class="letter-select" id="letterSelect">
+                <!-- 信件列表将通过JavaScript动态生成 -->
+            </div>
+            <button class="letter-new-btn" onclick="newLetter()">新建信件</button>
+            <button class="letter-edit-btn" onclick="toggleLetterEdit()">编辑信件</button>
+            <div class="letter-content" id="letterContent">
+                <p>亲爱的你：</p>
+                <p>在这个温暖的午后，我想写封信给你。</p>
+                <p>生活就像一本相册，每一页都记录着不同的故事。有些瞬间转瞬即逝，有些记忆却永远珍藏。</p>
+                <p>愿这些照片能带给你温暖，就像阳光透过树叶的缝隙，洒在心底最柔软的地方。</p>
+                <p>期待与你一起，继续书写属于我们的故事。</p>
+                <div class="letter-signature">
+                    <p>永远的朋友 <span class="letter-heart">❤</span></p>
+                    <p class="letter-date">2024年3月</p>
+                </div>
+            </div>
+            <div class="letter-edit-form" style="display: none;">
+                <textarea class="letter-input" id="letterText" placeholder="在这里写下你的信..."></textarea>
+                <button class="letter-save-btn" onclick="saveLetter()">保存信件</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="music-player">
+        <div class="music-control" onclick="handleMusicPlay()">
+            <span id="musicIcon">▶</span>
+        </div>
+        <div class="music-info">
+            <div class="music-title">春风十里</div>
+            <div class="music-artist">鹿先森乐队</div>
+        </div>
+        <audio id="bgMusic" controls style="display: none;">
+            <source src="鹿先森乐队 - 春风十里.mp3" type="audio/mp3">
+            您的浏览器不支持音频播放
+        </audio>
+    </div>
+
+    <div class="photo-preview" id="photoPreview" style="display: none;">
+        <img src="" alt="预览图片" id="previewImage">
+        <div class="close-btn" onclick="closePreview()">&times;</div>
+    </div>
+
+    <script>
+        let currentPhoto = null;
+        const gallery = document.getElementById('gallery');
+        const emptyState = document.getElementById('emptyState');
+        const API_BASE_URL = 'http://localhost:3000';
+        
+        // 处理照片上传
+        document.getElementById('photoInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                console.log('选择的文件:', file.name, file.type, file.size);
+                if (file.size > 10 * 1024 * 1024) { // 10MB限制
+                    alert('文件大小不能超过10MB');
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentPhoto = e.target.result;
+                    console.log('文件读取成功，准备显示上传模态框');
+                    showModal();
+                };
+                reader.onerror = function(error) {
+                    console.error('文件读取失败:', error);
+                    alert('文件读取失败，请重试');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // 保存照片
+        async function savePhoto() {
+            const title = document.getElementById('photoTitle').value.trim();
+            const description = document.getElementById('descriptionText').value.trim();
+            const date = document.getElementById('photoDate').value;
+            
+            if (!title) {
+                alert('请添加照片标题');
+                return;
+            }
+
+            if (!currentPhoto) {
+                alert('请选择要上传的照片');
+                return;
+            }
+
+            try {
+                console.log('开始准备上传数据...');
+                const formData = new FormData();
+                formData.append('title', title);
+                formData.append('description', description);
+                formData.append('date', date);
+                
+                // 将Base64图片转换为Blob
+                console.log('转换图片格式...');
+                const base64Data = currentPhoto.split(',')[1];
+                const byteCharacters = atob(base64Data);
+                const byteArrays = [];
+                
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteArrays.push(byteCharacters.charCodeAt(i));
+                }
+                
+                const byteArray = new Uint8Array(byteArrays);
+                const blob = new Blob([byteArray], { type: 'image/jpeg' });
+                formData.append('image', blob, 'photo.jpg');
+
+                console.log('开始发送请求...');
+                const response = await fetch(`${API_BASE_URL}/api/photos`, {
+                    method: 'POST',
+                    body: formData,
+                    mode: 'cors',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Accept': 'application/json',
+                    }
+                });
+
+                console.log('收到服务器响应:', response.status);
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('服务器错误响应:', errorText);
+                    throw new Error(errorText || '上传失败');
+                }
+
+                const responseData = await response.json();
+                console.log('服务器返回数据:', responseData);
+
+                closeModal();
+                loadPhotos();
+                alert('上传成功！');
+            } catch (error) {
+                console.error('上传过程中出错:', error);
+                if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
+                    alert('无法连接到服务器，请确保服务器正在运行并且地址正确');
+                } else {
+                    alert('上传失败: ' + error.message);
+                }
+            }
+        }
+
+        // 添加照片到画廊
+        function addPhotoToGallery(photo) {
+            const photoItem = document.createElement('div');
+            photoItem.className = 'photo-item';
+            photoItem.innerHTML = `
+                <img src="http://localhost:3000${photo.imageUrl}" alt="${photo.title}" onclick="showPhotoPreview('http://localhost:3000${photo.imageUrl}')">
+                <button class="delete-btn" onclick="deletePhoto('${photo._id}')">×</button>
+                <div class="photo-info">
+                    <h3>${photo.title}</h3>
+                    <p>${photo.description || ''}</p>
+                    <p class="photo-date">${new Date(photo.date).toLocaleDateString()}</p>
+                </div>
+            `;
+            gallery.appendChild(photoItem);
+        }
+
+        // 显示图片预览
+        function showPhotoPreview(url) {
+            console.log('显示图片预览:', url);
+            const preview = document.getElementById('photoPreview');
+            const previewImage = document.getElementById('previewImage');
+            previewImage.src = url;
+            preview.style.display = 'flex';
+        }
+
+        // 关闭预览
+        function closePreview() {
+            document.getElementById('photoPreview').style.display = 'none';
+        }
+
+        // 处理图片加载错误
+        function handleImageError(img, url) {
+            console.error('图片加载失败:', url);
+            img.onerror = null; // 防止无限循环
+            img.src = 'https://cdn-icons-png.flaticon.com/512/4254/4254068.png'; // 显示默认图片
+            // 尝试重新加载图片
+            setTimeout(() => {
+                console.log('尝试重新加载图片:', url);
+                img.src = url;
+            }, 1000);
+        }
+
+        // 加载照片
+        async function loadPhotos() {
+            try {
+                console.log('开始加载照片...');
+                const response = await fetch(`${API_BASE_URL}/api/photos`, {
+                    method: 'GET',
+                    mode: 'cors',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('服务器错误响应:', errorText);
+                    throw new Error(errorText || '加载失败');
+                }
+
+                console.log('收到照片列表响应:', response.status);
+                const photos = await response.json();
+                console.log('加载到的照片数量:', photos.length);
+                console.log('照片数据:', photos);
+                
+                gallery.innerHTML = '';
+                if (photos.length === 0) {
+                    gallery.appendChild(emptyState);
+                    return;
+                }
+                
+                photos.forEach(photo => {
+                    addPhotoToGallery(photo);
+                });
+            } catch (error) {
+                console.error('加载照片失败:', error);
+                if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
+                    console.error('无法连接到服务器');
+                    gallery.innerHTML = '<div class="empty-state"><h2>连接服务器失败</h2><p>请确保服务器正在运行</p></div>';
+                } else {
+                    alert('加载照片失败: ' + error.message);
+                }
+            }
+        }
+
+        // 删除照片
+        async function deletePhoto(id) {
+            if (confirm('确定要删除这张照片吗？')) {
+                try {
+                    console.log('开始删除照片:', id);
+                    const response = await fetch(`${API_BASE_URL}/api/photos/${id}`, {
+                        method: 'DELETE',
+                        mode: 'cors',
+                        credentials: 'same-origin',
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                    if (response.ok) {
+                        console.log('删除成功');
+                        loadPhotos();
+                    } else {
+                        const errorText = await response.text();
+                        console.error('删除失败:', errorText);
+                        throw new Error(errorText || '删除失败');
+                    }
+                } catch (error) {
+                    console.error('删除照片失败:', error);
+                    alert('删除照片失败，请稍后重试');
+                }
+            }
+        }
+
+        // 显示模态框
+        function showModal() {
+            document.getElementById('descriptionModal').style.display = 'block';
+            document.getElementById('photoDate').valueAsDate = new Date();
+            document.getElementById('photoTitle').focus();
+            
+            // 初始化字数统计
+            updateCharCount('photoTitle', 'titleCount', 10);
+            updateCharCount('descriptionText', 'descCount', 15);
+            
+            // 添加输入事件监听
+            document.getElementById('photoTitle').addEventListener('input', function() {
+                updateCharCount('photoTitle', 'titleCount', 10);
+            });
+            
+            document.getElementById('descriptionText').addEventListener('input', function() {
+                updateCharCount('descriptionText', 'descCount', 15);
+            });
+        }
+        
+        // 关闭模态框
+        function closeModal() {
+            document.getElementById('descriptionModal').style.display = 'none';
+            document.getElementById('photoTitle').value = '';
+            document.getElementById('descriptionText').value = '';
+            document.getElementById('photoDate').valueAsDate = new Date();
+        }
+
+        // 显示信件模态框
+        function showLetter() {
+            document.getElementById('letterModal').style.display = 'block';
+        }
+
+        // 关闭信件模态框
+        function closeLetterModal() {
+            document.getElementById('letterModal').style.display = 'none';
+        }
+        
+        let currentLetterId = null;
+        const defaultLetter = {
+            id: 'default',
+            title: '第一封信',
+            content: `亲爱的你：
+
+在这个温暖的午后，我想写封信给你。
+
+生活就像一本相册，每一页都记录着不同的故事。有些瞬间转瞬即逝，有些记忆却永远珍藏。
+
+愿这些照片能带给你温暖，就像阳光透过树叶的缝隙，洒在心底最柔软的地方。
+
+期待与你一起，继续书写属于我们的故事。
+
+永远的朋友`
+        };
+
+        // 切换信件列表显示
+        function toggleLetterList() {
+            const select = document.getElementById('letterSelect');
+            select.classList.toggle('show');
+        }
+
+        // 加载信件列表
+        function loadLetterList() {
+            const select = document.getElementById('letterSelect');
+            const letters = JSON.parse(localStorage.getItem('letters')) || [defaultLetter];
+            
+            select.innerHTML = '';
+            letters.forEach(letter => {
+                const item = document.createElement('div');
+                item.className = `letter-item ${letter.id === currentLetterId ? 'active' : ''}`;
+                item.textContent = letter.title;
+                item.onclick = () => selectLetter(letter.id);
+                select.appendChild(item);
+            });
+        }
+
+        // 选择信件
+        function selectLetter(id) {
+            currentLetterId = id;
+            const letters = JSON.parse(localStorage.getItem('letters')) || [defaultLetter];
+            const letter = letters.find(l => l.id === id) || defaultLetter;
+            
+            // 更新显示内容
+            const content = document.getElementById('letterContent');
+            const paragraphs = letter.content.split('\n\n');
+            let html = '';
+            
+            paragraphs.forEach((text, index) => {
+                if (index === paragraphs.length - 1) {
+                    html += `<div class="letter-signature">
+                        <p>${text} <span class="letter-heart">❤</span></p>
+                        <p class="letter-date">${new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long' })}</p>
+                    </div>`;
+                } else {
+                    html += `<p>${text}</p>`;
+                }
+            });
+
+            content.innerHTML = html;
+            document.getElementById('letterSelect').classList.remove('show');
+            loadLetterList();
+        }
+
+        // 新建信件
+        function newLetter() {
+            const title = prompt('请输入信件标题：');
+            if (!title) return;
+
+            const letters = JSON.parse(localStorage.getItem('letters')) || [defaultLetter];
+            const newLetter = {
+                id: Date.now().toString(),
+                title: title,
+                content: `亲爱的你：
+
+在这里写下你想说的话...
+
+永远的朋友`
+            };
+
+            letters.push(newLetter);
+            localStorage.setItem('letters', JSON.stringify(letters));
+            selectLetter(newLetter.id);
+        }
+
+        // 修改保存信件函数
+        function saveLetter() {
+            const letterText = document.getElementById('letterText').value.trim();
+            if (!letterText) {
+                alert('请输入信件内容');
+                return;
+            }
+
+            const letters = JSON.parse(localStorage.getItem('letters')) || [defaultLetter];
+            const letterIndex = letters.findIndex(l => l.id === currentLetterId);
+            
+            if (letterIndex !== -1) {
+                letters[letterIndex].content = letterText;
+                localStorage.setItem('letters', JSON.stringify(letters));
+            }
+
+            // 更新显示内容
+            const content = document.getElementById('letterContent');
+            const paragraphs = letterText.split('\n\n');
+            let html = '';
+            
+            paragraphs.forEach((text, index) => {
+                if (index === paragraphs.length - 1) {
+                    html += `<div class="letter-signature">
+                        <p>${text} <span class="letter-heart">❤</span></p>
+                        <p class="letter-date">${new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long' })}</p>
+                    </div>`;
+                } else {
+                    html += `<p>${text}</p>`;
+                }
+            });
+
+            content.innerHTML = html;
+            document.getElementById('letterSelect').classList.remove('show');
+            loadLetterList();
+        }
+
+        // 初始化音频
+        function initAudio() {
+            const audio = document.getElementById('bgMusic');
+            const musicIcon = document.getElementById('musicIcon');
+            
+            // 设置音频循环播放
+            audio.loop = true;
+            
+            // 监听音频播放状态
+            audio.addEventListener('play', () => {
+                musicIcon.textContent = '⏸';
+            });
+            
+            audio.addEventListener('pause', () => {
+                musicIcon.textContent = '▶';
+            });
+
+            // 添加页面点击事件监听器
+            let hasPlayed = false;
+            document.addEventListener('click', function firstPlay() {
+                if (!hasPlayed) {
+                    audio.play().then(() => {
+                        musicIcon.textContent = '⏸';
+                        hasPlayed = true;
+                    }).catch(error => {
+                        console.error('自动播放失败:', error);
+                    });
+                    // 移除事件监听器，只执行一次
+                    document.removeEventListener('click', firstPlay);
+                }
+            });
+        }
+
+        // 处理音乐播放/暂停
+        function handleMusicPlay() {
+            const audio = document.getElementById('bgMusic');
+            const musicIcon = document.getElementById('musicIcon');
+            
+            if (audio.paused) {
+                audio.play().then(() => {
+                    musicIcon.textContent = '⏸';
+                }).catch(error => {
+                    console.error('播放失败:', error);
+                });
+            } else {
+                audio.pause();
+                musicIcon.textContent = '▶';
+            }
+        }
+
+        // 页面加载时初始化
+        window.onload = function() {
+            console.log('页面加载完成，开始初始化...');
+            loadPhotos();
+            loadLetterList();
+            selectLetter('default');
+            initAudio();
+        };
+    </script>
+</body>
+</html>
