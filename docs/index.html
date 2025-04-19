@@ -1046,74 +1046,51 @@
             }
         });
 
-        // 保存照片
-        async function savePhoto() {
-            const title = document.getElementById('photoTitle').value.trim();
-            const description = document.getElementById('descriptionText').value.trim();
-            const date = document.getElementById('photoDate').value;
+        // 上传照片
+        async function uploadPhoto(event) {
+            event.preventDefault();
             
-            if (!title) {
-                alert('请添加照片标题');
+            const formData = new FormData();
+            const fileInput = document.getElementById('photoInput');
+            const titleInput = document.getElementById('photoTitle');
+            const descriptionInput = document.getElementById('descriptionText');
+            
+            if (!fileInput.files[0]) {
+                alert('请选择一张照片');
                 return;
             }
-
-            if (!currentPhoto) {
-                alert('请选择要上传的照片');
-                return;
-            }
-
+            
+            formData.append('image', fileInput.files[0]);
+            formData.append('title', titleInput.value);
+            formData.append('description', descriptionInput.value);
+            
             try {
-                console.log('开始准备上传数据...');
-                const formData = new FormData();
-                formData.append('title', title);
-                formData.append('description', description);
-                formData.append('date', date);
-                
-                // 将Base64图片转换为Blob
-                console.log('转换图片格式...');
-                const base64Data = currentPhoto.split(',')[1];
-                const byteCharacters = atob(base64Data);
-                const byteArrays = [];
-                
-                for (let i = 0; i < byteCharacters.length; i++) {
-                    byteArrays.push(byteCharacters.charCodeAt(i));
-                }
-                
-                const byteArray = new Uint8Array(byteArrays);
-                const blob = new Blob([byteArray], { type: 'image/jpeg' });
-                formData.append('image', blob, 'photo.jpg');
-
-                console.log('开始发送请求...');
+                console.log('开始上传照片...');
                 const response = await fetch(`${API_BASE_URL}/api/photos`, {
                     method: 'POST',
-                    body: formData,
-                    mode: 'cors',
-                    credentials: 'same-origin',
-                    headers: {
-                        'Accept': 'application/json',
-                    }
+                    body: formData
                 });
-
-                console.log('收到服务器响应:', response.status);
+                
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error('服务器错误响应:', errorText);
-                    throw new Error(errorText || '上传失败');
+                    throw new Error(`上传失败: ${response.status}`);
                 }
-
-                const responseData = await response.json();
-                console.log('服务器返回数据:', responseData);
-
-                closeModal();
-                loadPhotos();
-                alert('上传成功！');
+                
+                const result = await response.json();
+                console.log('上传成功:', result);
+                
+                // 清空表单
+                fileInput.value = '';
+                titleInput.value = '';
+                descriptionInput.value = '';
+                
+                // 重新加载照片列表
+                await loadPhotos();
+                
+                // 关闭上传模态框
+                document.getElementById('uploadModal').style.display = 'none';
             } catch (error) {
-                console.error('上传过程中出错:', error);
-                if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
-                    alert('无法连接到服务器，请确保服务器正在运行并且地址正确');
-                } else {
-                    alert('上传失败: ' + error.message);
-                }
+                console.error('上传照片失败:', error);
+                alert('上传照片失败，请检查控制台获取详细信息');
             }
         }
 
@@ -1163,7 +1140,7 @@
         async function loadPhotos() {
             try {
                 console.log('开始加载照片...');
-                console.log('API地址:', `${API_BASE_URL}/api/photos`);
+                console.log('API地址:', API_BASE_URL);
                 
                 const response = await fetch(`${API_BASE_URL}/api/photos`, {
                     method: 'GET',
@@ -1173,68 +1150,66 @@
                         'Content-Type': 'application/json'
                     }
                 });
-
-                console.log('收到响应:', response.status, response.statusText);
+                
+                console.log('响应状态:', response.status);
                 
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error('服务器错误响应:', errorText);
-                    throw new Error(errorText || '加载失败');
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
-
-                const photos = await response.json();
-                console.log('加载到的照片数量:', photos.length);
-                console.log('照片数据:', photos);
                 
-                gallery.innerHTML = '';
+                const photos = await response.json();
+                console.log('获取到的照片数据:', photos);
+                
+                const photoGrid = document.getElementById('gallery');
+                photoGrid.innerHTML = '';
+                
                 if (photos.length === 0) {
-                    gallery.appendChild(emptyState);
+                    emptyState.style.display = 'block';
                     return;
                 }
                 
+                emptyState.style.display = 'none';
                 photos.forEach(photo => {
-                    addPhotoToGallery(photo);
+                    const photoElement = document.createElement('div');
+                    photoElement.className = 'photo-item';
+                    photoElement.innerHTML = `
+                        <img src="${API_BASE_URL}${photo.imageUrl}" alt="${photo.title}" onclick="showPhotoPreview('${API_BASE_URL}${photo.imageUrl}')">
+                        <button class="delete-btn" onclick="deletePhoto('${photo._id}')">×</button>
+                        <div class="photo-info">
+                            <h3>${photo.title}</h3>
+                            <p>${photo.description}</p>
+                            <p class="photo-date">${new Date(photo.date).toLocaleDateString()}</p>
+                        </div>
+                    `;
+                    photoGrid.appendChild(photoElement);
                 });
             } catch (error) {
                 console.error('加载照片失败:', error);
-                if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
-                    console.error('无法连接到服务器，请检查：');
-                    console.error('1. 服务器是否正在运行');
-                    console.error('2. API地址是否正确:', API_BASE_URL);
-                    console.error('3. CORS配置是否正确');
-                    gallery.innerHTML = '<div class="empty-state"><h2>连接服务器失败</h2><p>请确保服务器正在运行</p></div>';
-                } else {
-                    alert('加载照片失败: ' + error.message);
-                }
+                alert('加载照片失败，请检查控制台获取详细信息');
             }
         }
 
         // 删除照片
         async function deletePhoto(id) {
-            if (confirm('确定要删除这张照片吗？')) {
-                try {
-                    console.log('开始删除照片:', id);
-                    const response = await fetch(`${API_BASE_URL}/api/photos/${id}`, {
-                        method: 'DELETE',
-                        mode: 'cors',
-                        credentials: 'same-origin',
-                        headers: {
-                            'Accept': 'application/json'
-                        }
-                    });
-
-                    if (response.ok) {
-                        console.log('删除成功');
-                        loadPhotos();
-                    } else {
-                        const errorText = await response.text();
-                        console.error('删除失败:', errorText);
-                        throw new Error(errorText || '删除失败');
-                    }
-                } catch (error) {
-                    console.error('删除照片失败:', error);
-                    alert('删除照片失败，请稍后重试');
+            if (!confirm('确定要删除这张照片吗？')) {
+                return;
+            }
+            
+            try {
+                console.log('开始删除照片:', id);
+                const response = await fetch(`${API_BASE_URL}/api/photos/${id}`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`删除失败: ${response.status}`);
                 }
+                
+                console.log('删除成功');
+                await loadPhotos();
+            } catch (error) {
+                console.error('删除照片失败:', error);
+                alert('删除照片失败，请检查控制台获取详细信息');
             }
         }
 
@@ -1300,103 +1275,208 @@
         }
 
         // 加载信件列表
-        function loadLetterList() {
-            const select = document.getElementById('letterSelect');
-            const letters = JSON.parse(localStorage.getItem('letters')) || [defaultLetter];
-            
-            select.innerHTML = '';
-            letters.forEach(letter => {
-                const item = document.createElement('div');
-                item.className = `letter-item ${letter.id === currentLetterId ? 'active' : ''}`;
-                item.textContent = letter.title;
-                item.onclick = () => selectLetter(letter.id);
-                select.appendChild(item);
-            });
+        async function loadLetterList() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/letters`, {
+                    method: 'GET',
+                    mode: 'cors',
+                    credentials: 'include',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const letters = await response.json();
+                const select = document.getElementById('letterSelect');
+                select.innerHTML = '';
+                
+                if (letters.length === 0) {
+                    // 如果没有信件，创建默认信件
+                    await createDefaultLetter();
+                    await loadLetterList();
+                    return;
+                }
+                
+                letters.forEach(letter => {
+                    const item = document.createElement('div');
+                    item.className = `letter-item ${letter._id === currentLetterId ? 'active' : ''}`;
+                    item.textContent = letter.title;
+                    item.onclick = () => selectLetter(letter._id);
+                    select.appendChild(item);
+                });
+            } catch (error) {
+                console.error('加载信件列表失败:', error);
+                alert('加载信件列表失败，请检查控制台获取详细信息');
+            }
+        }
+
+        // 创建默认信件
+        async function createDefaultLetter() {
+            try {
+                const defaultLetter = {
+                    title: '第一封信',
+                    content: `亲爱的你：
+
+在这个温暖的午后，我想写封信给你。
+
+生活就像一本相册，每一页都记录着不同的故事。有些瞬间转瞬即逝，有些记忆却永远珍藏。
+
+愿这些照片能带给你温暖，就像阳光透过树叶的缝隙，洒在心底最柔软的地方。
+
+期待与你一起，继续书写属于我们的故事。
+
+永远的朋友`,
+                    signature: '永远的朋友'
+                };
+                
+                const response = await fetch(`${API_BASE_URL}/api/letters`, {
+                    method: 'POST',
+                    mode: 'cors',
+                    credentials: 'include',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(defaultLetter)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const newLetter = await response.json();
+                currentLetterId = newLetter._id;
+            } catch (error) {
+                console.error('创建默认信件失败:', error);
+            }
         }
 
         // 选择信件
-        function selectLetter(id) {
-            currentLetterId = id;
-            const letters = JSON.parse(localStorage.getItem('letters')) || [defaultLetter];
-            const letter = letters.find(l => l.id === id) || defaultLetter;
-            
-            // 更新显示内容
-            const content = document.getElementById('letterContent');
-            const paragraphs = letter.content.split('\n\n');
-            let html = '';
-            
-            paragraphs.forEach((text, index) => {
-                if (index === paragraphs.length - 1) {
-                    html += `<div class="letter-signature">
-                        <p>${text} <span class="letter-heart">❤</span></p>
-                        <p class="letter-date">${new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long' })}</p>
-                    </div>`;
-                } else {
-                    html += `<p>${text}</p>`;
+        async function selectLetter(id) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/letters/${id}`, {
+                    method: 'GET',
+                    mode: 'cors',
+                    credentials: 'include',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
-            });
+                
+                const letter = await response.json();
+                currentLetterId = id;
+                
+                // 更新显示内容
+                const content = document.getElementById('letterContent');
+                const paragraphs = letter.content.split('\n\n');
+                let html = '';
+                
+                paragraphs.forEach((text, index) => {
+                    if (index === paragraphs.length - 1) {
+                        html += `<div class="letter-signature">
+                            <p>${text} <span class="letter-heart">❤</span></p>
+                            <p class="letter-date">${new Date(letter.date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long' })}</p>
+                        </div>`;
+                    } else {
+                        html += `<p>${text}</p>`;
+                    }
+                });
 
-            content.innerHTML = html;
-            document.getElementById('letterSelect').classList.remove('show');
-            loadLetterList();
+                content.innerHTML = html;
+                document.getElementById('letterSelect').classList.remove('show');
+                loadLetterList();
+            } catch (error) {
+                console.error('选择信件失败:', error);
+                alert('选择信件失败，请检查控制台获取详细信息');
+            }
         }
 
         // 新建信件
-        function newLetter() {
+        async function newLetter() {
             const title = prompt('请输入信件标题：');
             if (!title) return;
 
-            const letters = JSON.parse(localStorage.getItem('letters')) || [defaultLetter];
-            const newLetter = {
-                id: Date.now().toString(),
-                title: title,
-                content: `亲爱的你：
+            try {
+                const newLetter = {
+                    title,
+                    content: `亲爱的你：
 
 在这里写下你想说的话...
 
-永远的朋友`
-            };
-
-            letters.push(newLetter);
-            localStorage.setItem('letters', JSON.stringify(letters));
-            selectLetter(newLetter.id);
+永远的朋友`,
+                    signature: '永远的朋友'
+                };
+                
+                const response = await fetch(`${API_BASE_URL}/api/letters`, {
+                    method: 'POST',
+                    mode: 'cors',
+                    credentials: 'include',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(newLetter)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                await selectLetter(result._id);
+            } catch (error) {
+                console.error('新建信件失败:', error);
+                alert('新建信件失败，请检查控制台获取详细信息');
+            }
         }
 
-        // 修改保存信件函数
-        function saveLetter() {
+        // 保存信件
+        async function saveLetter() {
             const letterText = document.getElementById('letterText').value.trim();
             if (!letterText) {
                 alert('请输入信件内容');
                 return;
             }
 
-            const letters = JSON.parse(localStorage.getItem('letters')) || [defaultLetter];
-            const letterIndex = letters.findIndex(l => l.id === currentLetterId);
-            
-            if (letterIndex !== -1) {
-                letters[letterIndex].content = letterText;
-                localStorage.setItem('letters', JSON.stringify(letters));
-            }
-
-            // 更新显示内容
-            const content = document.getElementById('letterContent');
-            const paragraphs = letterText.split('\n\n');
-            let html = '';
-            
-            paragraphs.forEach((text, index) => {
-                if (index === paragraphs.length - 1) {
-                    html += `<div class="letter-signature">
-                        <p>${text} <span class="letter-heart">❤</span></p>
-                        <p class="letter-date">${new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long' })}</p>
-                    </div>`;
-                } else {
-                    html += `<p>${text}</p>`;
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/letters/${currentLetterId}`, {
+                    method: 'PUT',
+                    mode: 'cors',
+                    credentials: 'include',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        content: letterText,
+                        signature: '永远的朋友'
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
-            });
-
-            content.innerHTML = html;
-            document.getElementById('letterSelect').classList.remove('show');
-            loadLetterList();
+                
+                const updatedLetter = await response.json();
+                await selectLetter(updatedLetter._id);
+                
+                // 切换回显示模式
+                document.getElementById('letterContent').style.display = 'block';
+                document.querySelector('.letter-edit-form').style.display = 'none';
+            } catch (error) {
+                console.error('保存信件失败:', error);
+                alert('保存信件失败，请检查控制台获取详细信息');
+            }
         }
 
         // 初始化音频
