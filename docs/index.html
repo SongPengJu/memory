@@ -242,11 +242,22 @@
             font-size: 24px;
             cursor: pointer;
             color: var(--text-secondary);
-            transition: color 0.3s ease;
+            transition: all 0.3s ease;
+            z-index: 1001;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
         .close-btn:hover {
-            color: var(--text-color);
+            background: var(--primary-color);
+            color: white;
+            transform: rotate(90deg);
         }
 
         .form-group {
@@ -413,31 +424,62 @@
         .letter-edit-btn {
             position: absolute;
             top: 15px;
-            right: 15px;
+            right: 52px;
             background: var(--primary-color);
             color: white;
             border: none;
-            border-radius: 20px;
-            padding: 8px 15px;
+            border-radius: 25px;
+            padding: 8px 20px;
             cursor: pointer;
             font-size: 0.9em;
             transition: all 0.3s ease;
             z-index: 2;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .letter-edit-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .letter-edit-btn::before {
+            content: "✎";
+            font-size: 1.1em;
         }
 
         .letter-new-btn {
             position: absolute;
             top: 15px;
-            right: 100px;
+            right: 180px;
             background: var(--secondary-color);
             color: white;
             border: none;
-            border-radius: 20px;
-            padding: 8px 15px;
+            border-radius: 25px;
+            padding: 8px 20px;
             cursor: pointer;
             font-size: 0.9em;
             transition: all 0.3s ease;
             z-index: 2;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .letter-new-btn:hover {
+            background: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .letter-new-btn::before {
+            content: "+";
+            font-size: 1.2em;
+            font-weight: bold;
         }
 
         .letter-list {
@@ -445,17 +487,28 @@
             top: 15px;
             left: 15px;
             background: white;
-            border-radius: 20px;
-            padding: 8px 15px;
+            border-radius: 25px;
+            padding: 8px 20px;
             cursor: pointer;
             font-size: 0.9em;
             transition: all 0.3s ease;
             z-index: 2;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
 
         .letter-list:hover {
-            background: #f0f0f0;
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .letter-list::before {
+            content: "📝";
+            font-size: 1.1em;
         }
 
         .letter-select {
@@ -709,6 +762,20 @@
                 width: 35px;
                 height: 35px;
             }
+
+            .letter-edit-btn {
+                right: 15px;
+                padding: 8px 15px;
+            }
+
+            .letter-new-btn {
+                right: 140px;
+                padding: 8px 15px;
+            }
+
+            .letter-list {
+                padding: 8px 15px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -741,6 +808,23 @@
             .save-btn {
                 padding: 10px 25px;
                 font-size: 1em;
+            }
+
+            .letter-edit-btn {
+                right: 15px;
+                padding: 8px 12px;
+                font-size: 0.8em;
+            }
+
+            .letter-new-btn {
+                right: 120px;
+                padding: 8px 12px;
+                font-size: 0.8em;
+            }
+
+            .letter-list {
+                padding: 8px 12px;
+                font-size: 0.8em;
             }
         }
 
@@ -897,14 +981,14 @@
             <button class="letter-new-btn" onclick="newLetter()">新建信件</button>
             <button class="letter-edit-btn" onclick="toggleLetterEdit()">编辑信件</button>
             <div class="letter-content" id="letterContent">
-                <p>To us：</p>
+                <p>亲爱的你：</p>
                 <p>在这个温暖的午后，我想写封信给你。</p>
                 <p>生活就像一本相册，每一页都记录着不同的故事。有些瞬间转瞬即逝，有些记忆却永远珍藏。</p>
-                <p>生活总是阴晴不定，一切的经历都让我们成为更完整的自己，勇敢的爱过，没什么可后悔的。</p>
-                <p>山林从不向四季起誓，荣枯随缘。</p>
+                <p>愿这些照片能带给你温暖，就像阳光透过树叶的缝隙，洒在心底最柔软的地方。</p>
+                <p>期待与你一起，继续书写属于我们的故事。</p>
                 <div class="letter-signature">
-                    <p>一位朋友 <span class="letter-heart">❤</span></p>
-                    <p class="letter-date">2024年4月</p>
+                    <p>永远的朋友 <span class="letter-heart">❤</span></p>
+                    <p class="letter-date">2024年3月</p>
                 </div>
             </div>
             <div class="letter-edit-form" style="display: none;">
@@ -937,7 +1021,7 @@
         let currentPhoto = null;
         const gallery = document.getElementById('gallery');
         const emptyState = document.getElementById('emptyState');
-        const API_BASE_URL = 'http://localhost:3000';
+        const API_BASE_URL = 'https://server-backend-0y3z.onrender.com';  // Render服务URL
         
         // 处理照片上传
         document.getElementById('photoInput').addEventListener('change', function(e) {
@@ -1190,17 +1274,17 @@
         const defaultLetter = {
             id: 'default',
             title: '第一封信',
-            content: `To us：
+            content: `亲爱的你：
 
 在这个温暖的午后，我想写封信给你。
 
 生活就像一本相册，每一页都记录着不同的故事。有些瞬间转瞬即逝，有些记忆却永远珍藏。
 
-生活总是阴晴不定，一切的经历都让我们成为更完整的自己，勇敢的爱过，就足够了。
+愿这些照片能带给你温暖，就像阳光透过树叶的缝隙，洒在心底最柔软的地方。
 
-山林从不向四季起誓，荣枯随缘。
+期待与你一起，继续书写属于我们的故事。
 
-某位朋友`
+永远的朋友`
         };
 
         // 切换信件列表显示
@@ -1356,6 +1440,28 @@
             } else {
                 audio.pause();
                 musicIcon.textContent = '▶';
+            }
+        }
+
+        // 切换信件编辑模式
+        function toggleLetterEdit() {
+            const letterContent = document.getElementById('letterContent');
+            const letterEditForm = document.querySelector('.letter-edit-form');
+            const letterText = document.getElementById('letterText');
+            
+            if (letterContent.style.display !== 'none') {
+                // 切换到编辑模式
+                letterContent.style.display = 'none';
+                letterEditForm.style.display = 'block';
+                
+                // 获取当前信件内容并填充到编辑框
+                const letters = JSON.parse(localStorage.getItem('letters')) || [defaultLetter];
+                const currentLetter = letters.find(l => l.id === currentLetterId) || defaultLetter;
+                letterText.value = currentLetter.content;
+            } else {
+                // 切换回显示模式
+                letterContent.style.display = 'block';
+                letterEditForm.style.display = 'none';
             }
         }
 
