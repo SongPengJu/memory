@@ -974,30 +974,31 @@
     <div class="modal" id="letterModal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeLetterModal()">&times;</span>
-            <div class="letter-list" onclick="toggleLetterList()">信件列表</div>
-            <div class="letter-select" id="letterSelect">
-                <ul id="letterList"></ul>
+            <div class="letter-list-container">
+                <div class="letter-list" id="letterList"></div>
             </div>
-            <button class="letter-new-btn" onclick="newLetter()">新建信件</button>
-            <button class="letter-edit-btn" onclick="toggleLetterEdit()">编辑信件</button>
+            <div class="letter-controls">
+                <button class="letter-new-btn" onclick="newLetter()">新建信件</button>
+                <button class="letter-edit-btn" onclick="toggleLetterEdit()">编辑信件</button>
+            </div>
             <div class="letter-content" id="letterContent">
-                <div class="form-group">
-                    <label for="letterTitle">标题</label>
-                    <input type="text" id="letterTitle" class="text-input" placeholder="信件标题">
-                </div>
-                <div class="form-group">
-                    <label for="letterContentText">内容</label>
-                    <textarea id="letterContentText" class="text-input" placeholder="信件内容" style="height: 200px;"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="letterSignature">签名</label>
-                    <input type="text" id="letterSignature" class="text-input" placeholder="签名">
-                </div>
+                <h2 class="letter-title" id="letterTitleDisplay"></h2>
+                <div class="letter-text" id="letterContentDisplay"></div>
+                <div class="letter-signature" id="letterSignatureDisplay"></div>
+                <div class="letter-date" id="letterDateDisplay"></div>
             </div>
             <div class="letter-edit-form" style="display: none;">
                 <div class="form-group">
-                    <label for="letterText">编辑信件</label>
-                    <textarea id="letterText" class="text-input" placeholder="在这里写下你的信..." style="height: 300px;"></textarea>
+                    <label for="letterTitle">标题</label>
+                    <input type="text" id="letterTitle" class="text-input" placeholder="信件标题" required>
+                </div>
+                <div class="form-group">
+                    <label for="letterContentText">内容</label>
+                    <textarea id="letterContentText" class="text-input" placeholder="信件内容" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="letterSignature">签名</label>
+                    <input type="text" id="letterSignature" class="text-input" placeholder="签名" required>
                 </div>
                 <button class="letter-save-btn" onclick="saveLetter()">保存信件</button>
             </div>
@@ -1409,9 +1410,15 @@
                     return;
                 }
 
-                const title = document.getElementById('letterTitle').value;
-                const content = document.getElementById('letterContentText').value;
-                const signature = document.getElementById('letterSignature').value;
+                const title = document.getElementById('letterTitle').value.trim();
+                const content = document.getElementById('letterContentText').value.trim();
+                const signature = document.getElementById('letterSignature').value.trim();
+
+                // 验证必填字段
+                if (!title || !content || !signature) {
+                    alert('请填写所有必填字段');
+                    return;
+                }
 
                 console.log('保存的信件数据:', {
                     title,
@@ -1422,12 +1429,14 @@
                 const response = await fetch(`https://server-backend-0y3z.onrender.com/api/letters/${currentLetterId}`, {
                     method: 'PUT',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
                     },
                     body: JSON.stringify({
                         title,
                         content,
-                        signature
+                        signature,
+                        date: new Date().toISOString()
                     })
                 });
 
@@ -1443,9 +1452,14 @@
                 console.log('保存成功，更新后的信件:', updatedLetter);
 
                 // 更新显示
-                document.getElementById('letterTitle').value = updatedLetter.title;
-                document.getElementById('letterContentText').value = updatedLetter.content;
-                document.getElementById('letterSignature').value = updatedLetter.signature;
+                document.getElementById('letterTitleDisplay').textContent = updatedLetter.title;
+                document.getElementById('letterContentDisplay').textContent = updatedLetter.content;
+                document.getElementById('letterSignatureDisplay').textContent = updatedLetter.signature;
+                document.getElementById('letterDateDisplay').textContent = new Date(updatedLetter.date).toLocaleDateString();
+
+                // 切换回显示模式
+                document.querySelector('.letter-edit-form').style.display = 'none';
+                document.getElementById('letterContent').style.display = 'block';
 
                 // 重新加载信件列表
                 await loadLetterList();
@@ -1454,6 +1468,27 @@
             } catch (error) {
                 console.error('保存信件失败:', error);
                 alert('保存信件失败，请检查控制台获取详细信息');
+            }
+        }
+
+        // 切换信件编辑模式
+        function toggleLetterEdit() {
+            const letterContent = document.getElementById('letterContent');
+            const letterEditForm = document.querySelector('.letter-edit-form');
+            
+            if (letterContent.style.display !== 'none') {
+                // 切换到编辑模式
+                letterContent.style.display = 'none';
+                letterEditForm.style.display = 'block';
+                
+                // 填充当前信件内容到编辑表单
+                document.getElementById('letterTitle').value = document.getElementById('letterTitleDisplay').textContent;
+                document.getElementById('letterContentText').value = document.getElementById('letterContentDisplay').textContent;
+                document.getElementById('letterSignature').value = document.getElementById('letterSignatureDisplay').textContent;
+            } else {
+                // 切换回显示模式
+                letterContent.style.display = 'block';
+                letterEditForm.style.display = 'none';
             }
         }
 
@@ -1504,35 +1539,6 @@
             } else {
                 audio.pause();
                 musicIcon.textContent = '▶';
-            }
-        }
-
-        // 切换信件编辑模式
-        function toggleLetterEdit() {
-            const letterContent = document.getElementById('letterContent');
-            const letterEditForm = document.querySelector('.letter-edit-form');
-            const letterText = document.getElementById('letterText');
-            
-            if (!letterContent || !letterEditForm || !letterText) {
-                console.error('找不到编辑模式所需的元素');
-                return;
-            }
-            
-            if (letterContent.style.display !== 'none') {
-                // 切换到编辑模式
-                letterContent.style.display = 'none';
-                letterEditForm.style.display = 'block';
-                
-                // 获取当前信件内容并填充到编辑框
-                const title = document.getElementById('letterTitle').value;
-                const content = document.getElementById('letterContentText').value;
-                const signature = document.getElementById('letterSignature').value;
-                
-                letterText.value = `${title}\n\n${content}\n\n${signature}`;
-            } else {
-                // 切换回显示模式
-                letterContent.style.display = 'block';
-                letterEditForm.style.display = 'none';
             }
         }
 
