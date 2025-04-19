@@ -333,252 +333,89 @@
 
         .letter-content {
             background: #fff9e6;
-            padding: 30px;
+            padding: 40px;
             border-radius: 15px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             font-family: 'Ma Shan Zheng', cursive;
             line-height: 2;
-            text-align: center;
             position: relative;
-            animation: letterAppear 0.8s ease;
-            transform-origin: center;
             max-width: 600px;
-            margin: 0 auto;
+            margin: 20px auto;
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path d="M10,10 L90,10 L90,90 L10,90 Z" fill="none" stroke="%23ffd700" stroke-width="1" stroke-dasharray="5,5"/></svg>');
+            background-size: 100% 100%;
         }
 
-        @keyframes letterAppear {
-            0% {
-                transform: scale(0.8);
-                opacity: 0;
-            }
-            50% {
-                transform: scale(1.05);
-            }
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-
-        .letter-content::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path d="M10,10 L90,10 L90,90 L10,90 Z" fill="none" stroke="%23ffd700" stroke-width="1" stroke-dasharray="5,5"/></svg>');
-            opacity: 0.1;
-            pointer-events: none;
-        }
-
-        .letter-content p {
-            margin-bottom: 20px;
+        .letter-paper {
+            flex: 1;
+            padding: 20px;
             position: relative;
-            animation: fadeInUp 0.5s ease forwards;
-            opacity: 0;
+            z-index: 1;
         }
 
-        .letter-content p:nth-child(1) { animation-delay: 0.2s; }
-        .letter-content p:nth-child(2) { animation-delay: 0.4s; }
-        .letter-content p:nth-child(3) { animation-delay: 0.6s; }
-        .letter-content p:nth-child(4) { animation-delay: 0.8s; }
-        .letter-content p:nth-child(5) { animation-delay: 1s; }
+        .letter-title {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            color: #333;
+            font-weight: bold;
+            text-align: center;
+        }
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .letter-text {
+            font-size: 1.2em;
+            margin: 20px 0;
+            white-space: pre-wrap;
+            text-align: left;
+            padding: 0 20px;
         }
 
         .letter-signature {
             text-align: right;
             margin-top: 30px;
             font-style: italic;
-            animation: fadeIn 1.2s ease forwards;
-            opacity: 0;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            color: #666;
+            font-size: 1.1em;
         }
 
         .letter-date {
-            color: #666;
+            color: #999;
             font-size: 0.9em;
-            margin-top: 5px;
+            margin-top: 10px;
+            text-align: right;
         }
 
-        .letter-heart {
-            color: #ff6b6b;
-            font-size: 1.2em;
-            margin: 0 5px;
-        }
-
-        .letter-edit-btn {
-            position: absolute;
-            top: 15px;
-            right: 52px;
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 25px;
-            padding: 8px 20px;
-            cursor: pointer;
-            font-size: 0.9em;
-            transition: all 0.3s ease;
-            z-index: 2;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .letter-edit-btn:hover {
-            background: var(--secondary-color);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-
-        .letter-edit-btn::before {
-            content: "✎";
-            font-size: 1.1em;
-        }
-
-        .letter-new-btn {
-            position: absolute;
-            top: 15px;
-            right: 180px;
-            background: var(--secondary-color);
-            color: white;
-            border: none;
-            border-radius: 25px;
-            padding: 8px 20px;
-            cursor: pointer;
-            font-size: 0.9em;
-            transition: all 0.3s ease;
-            z-index: 2;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .letter-new-btn:hover {
-            background: var(--primary-color);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-
-        .letter-new-btn::before {
-            content: "+";
-            font-size: 1.2em;
-            font-weight: bold;
-        }
-
-        .letter-list {
-            position: absolute;
-            top: 15px;
-            left: 15px;
+        .letter-edit-form {
             background: white;
-            border-radius: 25px;
-            padding: 8px 20px;
-            cursor: pointer;
-            font-size: 0.9em;
-            transition: all 0.3s ease;
-            z-index: 2;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
-            gap: 5px;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin: 20px auto;
+            max-width: 600px;
+            display: none;
         }
 
-        .letter-list:hover {
-            background: var(--primary-color);
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-
-        .letter-list::before {
-            content: "📝";
-            font-size: 1.1em;
-        }
-
-        .letter-select {
+        .letter-controls {
             position: absolute;
-            top: 50px;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 10px;
+            z-index: 2;
+        }
+
+        .letter-list-container {
+            position: absolute;
+            top: 15px;
             left: 15px;
             background: white;
             border-radius: 15px;
             padding: 10px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-height: 300px;
+            overflow-y: auto;
             z-index: 2;
-            display: none;
-        }
-
-        .letter-select.show {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .letter-item {
-            padding: 8px 15px;
-            cursor: pointer;
-            border-radius: 10px;
-            transition: all 0.3s ease;
-        }
-
-        .letter-item:hover {
-            background: #f0f0f0;
-        }
-
-        .letter-item.active {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .letter-input {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-family: inherit;
-            font-size: 1em;
-            line-height: 1.6;
-            resize: vertical;
-            min-height: 200px;
-            margin-bottom: 20px;
-            transition: border-color 0.3s ease;
-        }
-
-        .letter-input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-        }
-
-        .letter-save-btn {
-            background: var(--primary-color);
-            color: white;
-            padding: 10px 25px;
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 1em;
-            transition: all 0.3s ease;
-            display: block;
-            margin: 0 auto;
-        }
-
-        .letter-save-btn:hover {
-            background: var(--secondary-color);
-            transform: translateY(-2px);
         }
 
         .music-player {
@@ -982,12 +819,14 @@
                 <button class="letter-edit-btn" onclick="toggleLetterEdit()">编辑信件</button>
             </div>
             <div class="letter-content" id="letterContent">
-                <h2 class="letter-title" id="letterTitleDisplay"></h2>
-                <div class="letter-text" id="letterContentDisplay"></div>
-                <div class="letter-signature" id="letterSignatureDisplay"></div>
-                <div class="letter-date" id="letterDateDisplay"></div>
+                <div class="letter-paper">
+                    <h2 class="letter-title" id="letterTitleDisplay"></h2>
+                    <div class="letter-text" id="letterContentDisplay"></div>
+                    <div class="letter-signature" id="letterSignatureDisplay"></div>
+                    <div class="letter-date" id="letterDateDisplay"></div>
+                </div>
             </div>
-            <div class="letter-edit-form" style="display: none;">
+            <div class="letter-edit-form" id="letterEditForm">
                 <div class="form-group">
                     <label for="letterTitle">标题</label>
                     <input type="text" id="letterTitle" class="text-input" placeholder="信件标题" required>
@@ -1458,7 +1297,7 @@
                 document.getElementById('letterDateDisplay').textContent = new Date(updatedLetter.date).toLocaleDateString();
 
                 // 切换回显示模式
-                document.querySelector('.letter-edit-form').style.display = 'none';
+                document.getElementById('letterEditForm').style.display = 'none';
                 document.getElementById('letterContent').style.display = 'block';
 
                 // 重新加载信件列表
@@ -1474,7 +1313,7 @@
         // 切换信件编辑模式
         function toggleLetterEdit() {
             const letterContent = document.getElementById('letterContent');
-            const letterEditForm = document.querySelector('.letter-edit-form');
+            const letterEditForm = document.getElementById('letterEditForm');
             
             if (letterContent.style.display !== 'none') {
                 // 切换到编辑模式
