@@ -1168,9 +1168,9 @@
                 const response = await fetch(`${API_BASE_URL}/api/photos`, {
                     method: 'GET',
                     mode: 'cors',
-                    credentials: 'same-origin',
                     headers: {
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
                     }
                 });
 
