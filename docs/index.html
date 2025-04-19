@@ -981,12 +981,24 @@
             <button class="letter-new-btn" onclick="newLetter()">新建信件</button>
             <button class="letter-edit-btn" onclick="toggleLetterEdit()">编辑信件</button>
             <div class="letter-content" id="letterContent">
-                <input type="text" id="letterTitle" class="text-input" placeholder="信件标题">
-                <textarea id="letterContentText" class="text-input" placeholder="信件内容"></textarea>
-                <input type="text" id="letterSignature" class="text-input" placeholder="签名">
+                <div class="form-group">
+                    <label for="letterTitle">标题</label>
+                    <input type="text" id="letterTitle" class="text-input" placeholder="信件标题">
+                </div>
+                <div class="form-group">
+                    <label for="letterContentText">内容</label>
+                    <textarea id="letterContentText" class="text-input" placeholder="信件内容" style="height: 200px;"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="letterSignature">签名</label>
+                    <input type="text" id="letterSignature" class="text-input" placeholder="签名">
+                </div>
             </div>
             <div class="letter-edit-form" style="display: none;">
-                <textarea class="letter-input" id="letterText" placeholder="在这里写下你的信..."></textarea>
+                <div class="form-group">
+                    <label for="letterText">编辑信件</label>
+                    <textarea id="letterText" class="text-input" placeholder="在这里写下你的信..." style="height: 300px;"></textarea>
+                </div>
                 <button class="letter-save-btn" onclick="saveLetter()">保存信件</button>
             </div>
         </div>
@@ -1330,10 +1342,12 @@
                     return;
                 }
                 
-                titleInput.value = letter.title;
-                contentInput.value = letter.content;
-                signatureInput.value = letter.signature;
+                titleInput.value = letter.title || '';
+                contentInput.value = letter.content || '';
+                signatureInput.value = letter.signature || '永远的朋友';
                 currentLetterId = letter._id;
+                
+                console.log('信件内容已更新');
             } catch (error) {
                 console.error('选择信件失败:', error);
                 alert('选择信件失败，请刷新页面重试');
@@ -1342,10 +1356,10 @@
 
         // 新建信件
         async function newLetter() {
-            const title = prompt('请输入信件标题：');
-            if (!title) return;
-
             try {
+                const title = prompt('请输入信件标题：');
+                if (!title) return;
+
                 const newLetter = {
                     title,
                     content: `亲爱的你：
@@ -1356,7 +1370,9 @@
                     signature: '永远的朋友'
                 };
                 
-                const response = await fetch(`https://server-backend-0y3z.onrender.com/api/letters`, {
+                console.log('创建新信件:', newLetter);
+                
+                const response = await fetch('https://server-backend-0y3z.onrender.com/api/letters', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1369,6 +1385,12 @@
                 }
                 
                 const result = await response.json();
+                console.log('新建信件成功:', result);
+                
+                // 重新加载信件列表
+                await loadLetterList();
+                
+                // 选择新创建的信件
                 await selectLetter(result._id);
             } catch (error) {
                 console.error('新建信件失败:', error);
