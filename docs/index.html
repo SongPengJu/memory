@@ -1122,7 +1122,7 @@
             const photoItem = document.createElement('div');
             photoItem.className = 'photo-item';
             photoItem.innerHTML = `
-                <img src="http://localhost:3000${photo.imageUrl}" alt="${photo.title}" onclick="showPhotoPreview('http://localhost:3000${photo.imageUrl}')">
+                <img src="${API_BASE_URL}${photo.imageUrl}" alt="${photo.title}" onclick="showPhotoPreview('${API_BASE_URL}${photo.imageUrl}')">
                 <button class="delete-btn" onclick="deletePhoto('${photo._id}')">×</button>
                 <div class="photo-info">
                     <h3>${photo.title}</h3>
