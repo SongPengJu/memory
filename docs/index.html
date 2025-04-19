@@ -976,20 +976,14 @@
             <span class="close-btn" onclick="closeLetterModal()">&times;</span>
             <div class="letter-list" onclick="toggleLetterList()">信件列表</div>
             <div class="letter-select" id="letterSelect">
-                <!-- 信件列表将通过JavaScript动态生成 -->
+                <ul id="letterList"></ul>
             </div>
             <button class="letter-new-btn" onclick="newLetter()">新建信件</button>
             <button class="letter-edit-btn" onclick="toggleLetterEdit()">编辑信件</button>
             <div class="letter-content" id="letterContent">
-                <p>亲爱的你：</p>
-                <p>在这个温暖的午后，我想写封信给你。</p>
-                <p>生活就像一本相册，每一页都记录着不同的故事。有些瞬间转瞬即逝，有些记忆却永远珍藏。</p>
-                <p>愿这些照片能带给你温暖，就像阳光透过树叶的缝隙，洒在心底最柔软的地方。</p>
-                <p>期待与你一起，继续书写属于我们的故事。</p>
-                <div class="letter-signature">
-                    <p>永远的朋友 <span class="letter-heart">❤</span></p>
-                    <p class="letter-date">2024年3月</p>
-                </div>
+                <input type="text" id="letterTitle" class="text-input" placeholder="信件标题">
+                <textarea id="letterContentText" class="text-input" placeholder="信件内容"></textarea>
+                <input type="text" id="letterSignature" class="text-input" placeholder="签名">
             </div>
             <div class="letter-edit-form" style="display: none;">
                 <textarea class="letter-input" id="letterText" placeholder="在这里写下你的信..."></textarea>
@@ -1286,6 +1280,11 @@
                 console.log('获取到的信件列表:', letters);
                 
                 const letterList = document.getElementById('letterList');
+                if (!letterList) {
+                    console.error('找不到信件列表元素');
+                    return;
+                }
+                
                 letterList.innerHTML = '';
                 
                 if (letters.length === 0) {
@@ -1322,9 +1321,18 @@
                 const letter = await response.json();
                 console.log('获取到的信件:', letter);
                 
-                document.getElementById('letterTitle').value = letter.title;
-                document.getElementById('letterContent').value = letter.content;
-                document.getElementById('letterSignature').value = letter.signature;
+                const titleInput = document.getElementById('letterTitle');
+                const contentInput = document.getElementById('letterContentText');
+                const signatureInput = document.getElementById('letterSignature');
+                
+                if (!titleInput || !contentInput || !signatureInput) {
+                    console.error('找不到信件输入元素');
+                    return;
+                }
+                
+                titleInput.value = letter.title;
+                contentInput.value = letter.content;
+                signatureInput.value = letter.signature;
                 currentLetterId = letter._id;
             } catch (error) {
                 console.error('选择信件失败:', error);
@@ -1380,7 +1388,7 @@
                 }
 
                 const title = document.getElementById('letterTitle').value;
-                const content = document.getElementById('letterContent').value;
+                const content = document.getElementById('letterContentText').value;
                 const signature = document.getElementById('letterSignature').value;
 
                 console.log('保存的信件数据:', {
@@ -1414,7 +1422,7 @@
 
                 // 更新显示
                 document.getElementById('letterTitle').value = updatedLetter.title;
-                document.getElementById('letterContent').value = updatedLetter.content;
+                document.getElementById('letterContentText').value = updatedLetter.content;
                 document.getElementById('letterSignature').value = updatedLetter.signature;
 
                 // 重新加载信件列表
@@ -1483,15 +1491,22 @@
             const letterEditForm = document.querySelector('.letter-edit-form');
             const letterText = document.getElementById('letterText');
             
+            if (!letterContent || !letterEditForm || !letterText) {
+                console.error('找不到编辑模式所需的元素');
+                return;
+            }
+            
             if (letterContent.style.display !== 'none') {
                 // 切换到编辑模式
                 letterContent.style.display = 'none';
                 letterEditForm.style.display = 'block';
                 
                 // 获取当前信件内容并填充到编辑框
-                const letters = JSON.parse(localStorage.getItem('letters')) || [defaultLetter];
-                const currentLetter = letters.find(l => l.id === currentLetterId) || defaultLetter;
-                letterText.value = currentLetter.content;
+                const title = document.getElementById('letterTitle').value;
+                const content = document.getElementById('letterContentText').value;
+                const signature = document.getElementById('letterSignature').value;
+                
+                letterText.value = `${title}\n\n${content}\n\n${signature}`;
             } else {
                 // 切换回显示模式
                 letterContent.style.display = 'block';
