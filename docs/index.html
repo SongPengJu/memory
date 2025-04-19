@@ -1163,6 +1163,8 @@
         async function loadPhotos() {
             try {
                 console.log('开始加载照片...');
+                console.log('API地址:', `${API_BASE_URL}/api/photos`);
+                
                 const response = await fetch(`${API_BASE_URL}/api/photos`, {
                     method: 'GET',
                     mode: 'cors',
@@ -1172,13 +1174,14 @@
                     }
                 });
 
+                console.log('收到响应:', response.status, response.statusText);
+                
                 if (!response.ok) {
                     const errorText = await response.text();
                     console.error('服务器错误响应:', errorText);
                     throw new Error(errorText || '加载失败');
                 }
 
-                console.log('收到照片列表响应:', response.status);
                 const photos = await response.json();
                 console.log('加载到的照片数量:', photos.length);
                 console.log('照片数据:', photos);
@@ -1195,7 +1198,10 @@
             } catch (error) {
                 console.error('加载照片失败:', error);
                 if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
-                    console.error('无法连接到服务器');
+                    console.error('无法连接到服务器，请检查：');
+                    console.error('1. 服务器是否正在运行');
+                    console.error('2. API地址是否正确:', API_BASE_URL);
+                    console.error('3. CORS配置是否正确');
                     gallery.innerHTML = '<div class="empty-state"><h2>连接服务器失败</h2><p>请确保服务器正在运行</p></div>';
                 } else {
                     alert('加载照片失败: ' + error.message);
