@@ -1406,17 +1406,28 @@
             }
             
             try {
-                console.log('开始删除照片:', id);
+                console.log('开始删除照片，ID:', id);
                 const response = await fetch(`${API_BASE_URL}/api/photos/${id}`, {
-                    method: 'DELETE'
+                    method: 'DELETE',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
                 });
                 
+                console.log('删除响应状态:', response.status);
+                
                 if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error('删除失败，错误信息:', errorData);
                     throw new Error(`删除失败: ${response.status}`);
                 }
                 
-                console.log('删除成功');
+                const result = await response.json();
+                console.log('删除成功，响应:', result);
+                
+                // 重新加载照片列表
                 await loadPhotos();
+                alert('照片删除成功！');
             } catch (error) {
                 console.error('删除照片失败:', error);
                 alert('删除照片失败，请检查控制台获取详细信息');
