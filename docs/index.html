@@ -1308,8 +1308,16 @@
         function addPhotoToGallery(photo) {
             const photoItem = document.createElement('div');
             photoItem.className = 'photo-item';
+            
+            // 处理图片URL
+            let imageUrl = photo.imageUrl;
+            if (!imageUrl.startsWith('http')) {
+                // 如果是相对路径，添加API基础URL
+                imageUrl = `${API_BASE_URL}${imageUrl}`;
+            }
+            
             photoItem.innerHTML = `
-                <img src="${API_BASE_URL}${photo.imageUrl}" alt="${photo.title}" onclick="showPhotoPreview('${API_BASE_URL}${photo.imageUrl}')">
+                <img src="${imageUrl}" alt="${photo.title}" onclick="showPhotoPreview('${imageUrl}')">
                 <button class="delete-btn" onclick="deletePhoto('${photo._id}')">×</button>
                 <div class="photo-info">
                     <h3>${photo.title}</h3>
@@ -1382,8 +1390,16 @@
                 photos.forEach(photo => {
                     const photoElement = document.createElement('div');
                     photoElement.className = 'photo-item';
+                    
+                    // 处理图片URL
+                    let imageUrl = photo.imageUrl;
+                    if (!imageUrl.startsWith('http')) {
+                        // 如果是相对路径，添加API基础URL
+                        imageUrl = `${API_BASE_URL}${imageUrl}`;
+                    }
+                    
                     photoElement.innerHTML = `
-                        <img src="${API_BASE_URL}${photo.imageUrl}" alt="${photo.title}" onclick="showPhotoPreview('${API_BASE_URL}${photo.imageUrl}')">
+                        <img src="${imageUrl}" alt="${photo.title}" onclick="showPhotoPreview('${imageUrl}')">
                         <button class="delete-btn" onclick="deletePhoto('${photo._id}')">×</button>
                         <div class="photo-info">
                             <h3>${photo.title}</h3>
