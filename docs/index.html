@@ -1666,6 +1666,20 @@
                     return;
                 }
 
+                // 验证字段长度
+                if (title.length > 50) {
+                    alert('标题不能超过50个字符');
+                    return;
+                }
+                if (content.length > 2000) {
+                    alert('内容不能超过2000个字符');
+                    return;
+                }
+                if (signature.length > 20) {
+                    alert('签名不能超过20个字符');
+                    return;
+                }
+
                 console.log('保存的信件数据:', {
                     title,
                     content,
@@ -1713,7 +1727,11 @@
                 alert('信件保存成功！');
             } catch (error) {
                 console.error('保存信件失败:', error);
-                alert('保存信件失败，请检查控制台获取详细信息');
+                if (error.message.includes('Failed to fetch')) {
+                    alert('无法连接到服务器，请检查网络连接');
+                } else {
+                    alert('保存信件失败，请检查控制台获取详细信息');
+                }
             }
         }
 
